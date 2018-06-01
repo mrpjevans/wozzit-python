@@ -1,0 +1,1 @@
+"{\"wozzit\": {\"version\": 1, \"protocol\": [0, 0, 1], \"schema\": \"wozzit.null\"}}"
