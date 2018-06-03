@@ -25,5 +25,6 @@ pip install requests pync emails notify2
 To start a server on port 10207 for all bound IP addresses:
 
 ```
-wozzit.server.listen()
+import wozzit
+wozzit.listen()
 ```
