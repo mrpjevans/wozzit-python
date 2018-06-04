@@ -21,13 +21,6 @@ smtp = {
     "fromName": None,
     "fromEmail": None
 }
-smtpHost = None
-smtpPort = None
-smtpSSL = True
-smtpUsername = None
-smtpPassword = None
-smtpFromName = None
-smtpFromEmail = None
 
 # Callback holder for errors
 onError =  None
@@ -118,12 +111,11 @@ def setOptions(opts={}):
     logging.basicConfig(level=level,format=format)
 
 # Our main function - configures and starts the server (can also set options at this point)
-def listen(opts=None):
+def listen(opts={}):
     global port, ip
 
-    if opts is not None:
-        setOptions(opts)
-
+    setOptions(opts)
+    
     # Configure and start server
     httpd = HTTPServer((ip, port), __WozzitRequestHandler)
     ip = '*' if ip == '' else ip 

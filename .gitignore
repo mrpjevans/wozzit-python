@@ -29,5 +29,5 @@ coverage
 .cache
 
 .DS_Store
-example.py
+example-private.py
 *.php
