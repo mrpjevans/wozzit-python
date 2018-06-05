@@ -133,11 +133,17 @@ def send(msg, to):
 
     # Send request
     logging.info('Sending to %s', to)
-    r = requests.post(url = to, json = msg.toJSON())
-    if r.status_code != 200:
-        logging.warn('Failed to send: %s', r.status_code)
+    try:
+        r = requests.post(url = to, json = msg.toJSON())
+        if r.status_code != 200:
+            logging.warn('Failed to send: %s', r.status_code)
+            if(onError is not None):
+                onError('send', r)
+    except:
+        logging.error('Unable to connect to server')
         if(onError is not None):
-            onError('send', r)
+            onError('noserver', r)
+        return False
 
     # Attempt to parse response into message
     logging.debug(r)
@@ -320,7 +326,7 @@ class Message:
     def toDict(self):
         output = {'wozzit': {'protocol': self.protocol, 'schema': self.schema, 'version': self.version}}
         if self.payload is not None:
-            output['payload'] = self.payload
+            output['wozzit']['payload'] = self.payload
         return output
 
     # Serialize this instance into JSON
