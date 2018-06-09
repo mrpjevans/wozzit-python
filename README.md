@@ -2,7 +2,7 @@
 
 ### A common language for the Internet of Things
 
-Version 0.0.2
+Version 0.1.1
 
 The Internet of Things (IoT) is all very well, but it seems as each device has
 its own protocols and ways of doing things. Wozzit aims to be a common
@@ -17,7 +17,7 @@ creating and receiving messages (known as 'havers').
 ### Installation
 
 ```
-pip install requests pync emails notify2
+pip install requests pync notify2
 ```
 
 ### Usage

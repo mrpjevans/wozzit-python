@@ -1,6 +1,9 @@
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-import requests, json, logging, emails, platform
+import requests, json, logging, platform
 import message
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 if platform.system() == 'Darwin':
         import pync
@@ -271,24 +274,26 @@ class Server:
             logging.warn('SMTP not configured')
             return
 
-        message = emails.Message(
-                    text= action['message'],
-                    subject= action['subject'],
-                    mail_from=(self.smtp['fromName'], self.smtp['fromEmail']))
-        
-        smtpOpts = {'host': self.smtp['host'], 'port': self.smtp['port'], 'ssl': self.smtp['SSL']}
-        if self.smtp['username'] != None:
-            smtpOpts['user'] = self.smtp['username']
-        if self.smtp['password'] != None:
-            smtpOpts['password'] = self.smtp['password']
-
-        logging.info('Sending email')
-        r = message.send(to=(action['toName'], action['toEmail']), smtp=smtpOpts)
-        if r.status_code != 250:
-            logging.error("Failed to send email: %s", r.status_text)
-            logging.debug(r)
-            if(self.onError is not None):
-                self.onError('sendEmail', r)
+        if self.smtp['SSL'] == True:
+            mta = smtplib.SMTP_SSL(self.smtp['host'], self.smtp['port'])
         else:
-            logging.debug('Successfully sent email')
+            mta = smtplib.SMTP(self.smtp['host'], self.smtp['port'])
+
+        if self.smtp['username'] != None and self.smtp['password'] != None:
+            mta.login(self.smtp["username"], self.smtp["password"])
+
+        mime = MIMEMultipart()
+        mime['From'] = self.smtp['fromName'] + " <" + self.smtp['fromEmail'] + ">"
+        mime['To'] = action['toName'] + " <" + action['toEmail'] + ">"
+        mime['Subject'] = action['subject']
+        body = action['message']
+        mime.attach(MIMEText(body, 'plain'))
+        msgText = mime.as_string()
+
+        try:
+            mta.sendmail(self.smtp['fromEmail'], action['toEmail'], msgText)
+            logging.info('Email sent to ' + action['toEmail'])
+        except:
+            e = sys.exc_info()[0]
+            logging.error('Failed to send email' + e)
 
