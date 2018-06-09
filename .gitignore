@@ -30,4 +30,5 @@ coverage
 
 .DS_Store
 example-private.py
+wozzit-*
 *.php

@@ -2,7 +2,7 @@
 
 ### A common language for the Internet of Things
 
-Version 0.0.1
+Version 0.0.2
 
 The Internet of Things (IoT) is all very well, but it seems as each device has
 its own protocols and ways of doing things. Wozzit aims to be a common
@@ -26,5 +26,6 @@ To start a server on port 10207 for all bound IP addresses:
 
 ```
 import wozzit
-wozzit.listen()
+server = wozzit.Server()
+server.listen()
 ```

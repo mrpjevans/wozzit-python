@@ -1,5 +1,7 @@
 import wozzit
 
 # To start a server with all defaults
-wozzit.listen()
+server = wozzit.Server()
+server.listen()
+
 
