@@ -1,7 +1,6 @@
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-import requests, json, logging, platform
+import requests, json, logging, platform, sys, smtplib
 import message
-import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -97,7 +96,7 @@ class Server:
         self.ip = opts['ip'] if opts.has_key('ip') else ''
 
         # Email Options
-        self.smtp['host'] = opts['smtp']['host'] if opts.has_key('smtp') and opts['smtp'].has_key('host') else 'localhost'
+        self.smtp['host'] = opts['smtp']['host'] if opts.has_key('smtp') and opts['smtp'].has_key('host') else None
         self.smtp['port'] = opts['smtp']['port'] if opts.has_key('smtp') and opts['smtp'].has_key('port') else 25
         self.smtp['SSL'] = opts['smtp']['SSL'] if opts.has_key('smtp') and opts['smtp'].has_key('SSL') else False
         self.smtp['username'] = opts['smtp']['username'] if opts.has_key('smtp') and opts['smtp'].has_key('username') else None
@@ -269,31 +268,33 @@ class Server:
             n.show()
 
     def __sendEmail(self, action, msg):
+        self.sendEmail(action['toName'], action['toEmail'], action['subject'], action['message'])
 
-        if self.smtp['host'] is None:
-            logging.warn('SMTP not configured')
-            return
+    def sendEmail(self, toName, toEmail, subject, body):
 
-        if self.smtp['SSL'] == True:
-            mta = smtplib.SMTP_SSL(self.smtp['host'], self.smtp['port'])
-        else:
-            mta = smtplib.SMTP(self.smtp['host'], self.smtp['port'])
+            if self.smtp['host'] is None:
+                logging.warn('SMTP not configured')
+                return
 
-        if self.smtp['username'] != None and self.smtp['password'] != None:
-            mta.login(self.smtp["username"], self.smtp["password"])
+            if self.smtp['SSL'] == True:
+                mta = smtplib.SMTP_SSL(self.smtp['host'], self.smtp['port'])
+            else:
+                mta = smtplib.SMTP(self.smtp['host'], self.smtp['port'])
 
-        mime = MIMEMultipart()
-        mime['From'] = self.smtp['fromName'] + " <" + self.smtp['fromEmail'] + ">"
-        mime['To'] = action['toName'] + " <" + action['toEmail'] + ">"
-        mime['Subject'] = action['subject']
-        body = action['message']
-        mime.attach(MIMEText(body, 'plain'))
-        msgText = mime.as_string()
+            if self.smtp['username'] != None and self.smtp['password'] != None:
+                mta.login(self.smtp["username"], self.smtp["password"])
 
-        try:
-            mta.sendmail(self.smtp['fromEmail'], action['toEmail'], msgText)
-            logging.info('Email sent to ' + action['toEmail'])
-        except:
-            e = sys.exc_info()[0]
-            logging.error('Failed to send email' + e)
+            mime = MIMEMultipart()
+            mime['From'] = self.smtp['fromName'] + " <" + self.smtp['fromEmail'] + ">"
+            mime['To'] = toName + " <" + toEmail + ">"
+            mime['Subject'] = subject
+            mime.attach(MIMEText(body, 'plain'))
+            msgText = mime.as_string()
+            
+            try:
+                mta.sendmail(self.smtp['fromEmail'], toEmail, msgText)
+                logging.info('Email sent to ' + toEmail)
+            except:
+                e = sys.exc_info()[0]
+                logging.error('Failed to send email: ' + str(e))
 
